@@ -1,98 +1,91 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# ClimaX API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Um backend robusto e escalável para o aplicativo de clima pessoal **ClimaX**.
+Desenvolvido com foco em boas práticas de arquitetura, esta API fornece dados meteorológicos em tempo real, gerenciamento de cidades favoritas, sistema de alertas customizados e envio de notificações push.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologias e Arquitetura
 
-## Description
+Este projeto foi construído aplicando conceitos de **Clean Architecture** e **Domain-Driven Design (DDD)**, garantindo baixo acoplamento e alta testabilidade.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Framework:** NestJS (Node.js)
+- **Linguagem:** TypeScript
+- **Banco de Dados:** PostgreSQL
+- **ORM:** Prisma
+- **Autenticação:** JWT (JSON Web Tokens)
+- **Integrações Externas:** \* [OpenWeather API](https://openweathermap.org/) (Dados climáticos)
+  - Firebase Admin SDK (Notificações Push / FCM)
+- **Documentação:** Swagger / Scalar
 
-## Project setup
+## Funcionalidades Principais
 
-```bash
-$ npm install
-```
+- **Autenticação e Autorização:** Registro de usuários, login seguro com hash de senhas (Bcrypt) e redefinição de senhas.
+- **Clima e Previsão:** Busca de clima atual e previsão para 5 dias por coordenadas, além de pesquisa de cidades por texto.
+- **Favoritos:** Gerenciamento de cidades favoritas vinculadas ao perfil do usuário.
+- **Alertas Inteligentes (Cron Jobs):** Criação de limites de temperatura e condições (chuva, tempestade). Um _Scheduler_ roda em background (a cada 30 min) validando o clima atual contra os limites definidos.
+- **Notificações Push:** Envio automático de alertas para os dispositivos móveis dos usuários via Firebase Cloud Messaging (FCM).
 
-## Compile and run the project
+## Estrutura do Projeto
 
-```bash
-# development
-$ npm run start
+A aplicação está dividida em módulos independentes (`src/modules`), cada um possuindo suas próprias camadas de Domínio, Aplicação (Casos de Uso), Infraestrutura e Apresentação (Controllers).
 
-# watch mode
-$ npm run start:dev
+    src/
+     ├── modules/
+     │   ├── alerts/          # Lógica de gatilhos e verificação de alertas climáticos
+     │   ├── auth/            # Gestão de usuários e JWT
+     │   ├── favorites/       # Cidades salvas pelo usuário
+     │   ├── notifications/   # Integração com Firebase FCM
+     │   └── weather/         # Comunicação com a OpenWeather API
+     ├── shared/              # Filtros globais, Prisma Service, etc.
+     └── main.ts              # Entry point e configuração global
 
-# production mode
-$ npm run start:prod
-```
+## Variáveis de Ambiente (.env.example)
 
-## Run tests
+Para rodar o projeto, crie um arquivo `.env` na raiz baseado nesta estrutura:
 
-```bash
-# unit tests
-$ npm run test
+    # Servidor
+    PORT=3000
+    FRONTEND_URL=http://localhost:5173
 
-# e2e tests
-$ npm run test:e2e
+    # Banco de Dados (Neon / PostgreSQL)
+    DATABASE_URL="postgresql://usuario:senha@host.neon.tech/nome_do_banco?sslmode=require"
 
-# test coverage
-$ npm run test:cov
-```
+    # Autenticação (JWT)
+    JWT_SECRET="sua_chave_secreta_super_segura"
+    JWT_EXPIRES_IN="7d"
 
-## Deployment
+    # API de Clima (OpenWeather)
+    OPENWEATHER_API_KEY="sua_chave_api_do_openweather"
+    OPENWEATHER_BASE_URL="https://api.openweathermap.org"
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+_Atenção: Você também precisará adicionar o arquivo `firebase-service-account.json` na pasta `src/config/` para que o envio de notificações push funcione corretamente._
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Como rodar localmente
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### 1. Clone o repositório
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+    git clone https://github.com/Leorodrigs/climax-backend.git
+    cd climax-backend
 
-## Resources
+### 2. Instale as dependências
 
-Check out a few resources that may come in handy when working with NestJS:
+    npm install
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 3. Configure o Ambiente
 
-## Support
+Preencha o arquivo `.env` com suas credenciais e adicione o JSON do Firebase conforme instruído acima.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 4. Execute as Migrations do Banco de Dados
 
-## Stay in touch
+    npx prisma migrate dev
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### 5. Inicie a aplicação
 
-## License
+    # Modo desenvolvimento
+    npm run start:dev
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+A API estará rodando em `http://localhost:3000/api/v1`.
+
+## Documentação da API (Swagger)
+
+A documentação interativa com todos os _endpoints_, schemas e métodos de autenticação está disponível via Swagger UI (renderizado com Scalar).
+Com a aplicação rodando, acesse: **`http://localhost:3000/api/docs`**
