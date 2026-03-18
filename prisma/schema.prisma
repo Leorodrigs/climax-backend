@@ -1,0 +1,67 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"  
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  favorites  FavoriteCity[]
+  alerts     WeatherAlert[]
+  pushTokens PushToken[]
+}
+
+model FavoriteCity {
+  id        String   @id @default(uuid())
+  cityName  String
+  lat       Float
+  lon       Float
+  country   String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lat, lon])
+}
+
+model WeatherAlert {
+  id             String    @id @default(uuid())
+  cityName       String
+  lat            Float
+  lon            Float
+  alertType      AlertType
+  thresholdValue Float?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PushToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum AlertType {
+  TEMPERATURE_BELOW
+  TEMPERATURE_ABOVE
+  STORM
+  RAIN
+}
