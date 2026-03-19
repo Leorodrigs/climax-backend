@@ -1,5 +1,0 @@
-{
-  "deploy": {
-    "startCommand": "npx prisma migrate deploy && node dist/main.js"
-  }
-}
