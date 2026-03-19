@@ -37,8 +37,9 @@ export class FirebaseService implements OnModuleInit {
       this.initialized = true;
       this.logger.log('Firebase Admin inicializado com sucesso');
     } catch (error) {
-      this.logger.error(`Falha ao inicializar Firebase Admin: ${error}`);
-      throw error;
+      this.logger.warn(
+        `Firebase não inicializado, push notifications desativadas: ${error}`,
+      );
     }
   }
 
