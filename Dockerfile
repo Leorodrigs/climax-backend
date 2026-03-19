@@ -13,4 +13,6 @@ RUN cp -r generated dist/generated
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js 2>&1 || (echo '=== NODE CRASHED ===' && exit 1)"]
+COPY start.sh .
+RUN chmod +x start.sh
+CMD ["./start.sh"]
