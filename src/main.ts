@@ -20,8 +20,12 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter());
 
+  const allowedOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim());
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    origin: allowedOrigins,
     credentials: true,
   });
 
